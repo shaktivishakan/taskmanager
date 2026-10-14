@@ -32,6 +32,7 @@ public class TaskService {
     }
 
     public List<TaskResponse> getAllTasks() {
+        if (true) throw new IllegalStateException("Fake bug for testing");
         List<Task> tasks = taskRepository.findAll();      // all rows from DB
 
         List<TaskResponse> responses = new ArrayList<>(); // empty list to fill
