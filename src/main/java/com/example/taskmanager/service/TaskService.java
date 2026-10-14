@@ -2,6 +2,7 @@ package com.example.taskmanager.service;
 
 import com.example.taskmanager.dto.TaskRequest;
 import com.example.taskmanager.dto.TaskResponse;
+import com.example.taskmanager.exception.TaskNotFoundException;
 import com.example.taskmanager.mapper.TaskMapper;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.repository.TaskRepository;
@@ -21,7 +22,6 @@ public class TaskService {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
     }
-
     public TaskResponse createTask(TaskRequest request) {
         // 1) request -> entity (use taskMapper)
         Task task = taskMapper.toEntity(request);
@@ -43,7 +43,7 @@ public class TaskService {
     public TaskResponse getTaskById(Long id) {
         Optional<Task> task = taskRepository.findById(id);
         if (task.isEmpty()) {
-            throw new RuntimeException("Task not found");
+            throw new TaskNotFoundException(id);
         }
         return taskMapper.toResponse(task.get());
     }
@@ -51,14 +51,14 @@ public class TaskService {
     public void deleteTask(Long id) {
         Optional<Task> task = taskRepository.findById(id);
         if (task.isEmpty()) {
-            throw new RuntimeException("Task not found");
+            throw new TaskNotFoundException(id);
         }
         taskRepository.delete(task.get());
     }
     public TaskResponse updateTask(Long id, TaskRequest request) {
         Optional<Task> task = taskRepository.findById(id);
         if (task.isEmpty()) {
-            throw new RuntimeException("Task not found");
+            throw new TaskNotFoundException(id);
         }
         Task existingTask = task.get();
         taskMapper.updateEntity(request, existingTask);
