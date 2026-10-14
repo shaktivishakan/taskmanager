@@ -2,6 +2,7 @@ package com.example.taskmanager.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -44,6 +45,20 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(), // 400
                 "Validation failed",            // short summary; details are in 'errors'
                 errors,
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // Runs when the request body can't be converted into a Java object:
+    // broken JSON syntax (missing comma, bracket) or an invalid enum value
+    // like "status": "BANANA". This happens before @Valid validation.
+    // We don't send ex.getMessage() because it exposes internal class names.
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleUnreadableJson(HttpMessageNotReadableException ex) {
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),      // 400: the client sent bad data
+                "Incorrect JSON format",
                 LocalDateTime.now()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
